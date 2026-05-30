@@ -1,0 +1,26 @@
+# System & Editors
+.DS_Store
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+
+# Environment Variables & Encryption Keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Server Logs & Process Managers
+logs/
+*.log
+npm-debug.log*
+pids/
+*.pid
+
+# Local Database Files & User Uploads
+*.db
+*.sqlite
+uploads/
