@@ -6,6 +6,23 @@ const puppeteer = require("puppeteer")
 const ai = new GoogleGenAI({
     apiKey: process.env.GOOGLE_GENAI_API_KEY
 })
+console.log("Using Gemini key starting with:", process.env.GOOGLE_GENAI_API_KEY?.slice(0, 8))
+
+async function callGeminiWithRetry(requestFn, retries = 3, delayMs = 2000) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            return await requestFn()
+        } catch (error) {
+            const isRateLimit = error?.status === 429 || error?.message?.includes("429") || error?.message?.toLowerCase().includes("rate limit") || error?.message?.toLowerCase().includes("quota")
+
+            if (isRateLimit && attempt < retries) {
+                await new Promise(resolve => setTimeout(resolve, delayMs * attempt))
+                continue
+            }
+            throw error
+        }
+    }
+}
 
 
 const interviewReportSchema = z.object({
@@ -41,14 +58,14 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
                         Job Description: ${jobDescription}
 `
 
-    const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+    const response = await callGeminiWithRetry(() => ai.models.generateContent({
+        model: "gemini-2.5-flash",
         contents: prompt,
         config: {
             responseMimeType: "application/json",
             responseSchema: zodToJsonSchema(interviewReportSchema),
         }
-    })
+    }))
 
     return JSON.parse(response.text)
 
@@ -95,14 +112,14 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
                         The resume should not be so lengthy, it should ideally be 1-2 pages long when converted to PDF. Focus on quality rather than quantity and make sure to include all the relevant information that can increase the candidate's chances of getting an interview call for the given job description.
                     `
 
-    const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+    const response = await callGeminiWithRetry(() => ai.models.generateContent({
+        model: "gemini-2.5-flash",
         contents: prompt,
         config: {
             responseMimeType: "application/json",
             responseSchema: zodToJsonSchema(resumePdfSchema),
         }
-    })
+    }))
 
 
     const jsonContent = JSON.parse(response.text)

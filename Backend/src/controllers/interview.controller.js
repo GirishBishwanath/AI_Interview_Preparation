@@ -10,27 +10,38 @@ const interviewReportModel = require("../models/interviewReport.model")
  */
 async function generateInterViewReportController(req, res) {
 
-    const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
-    const { selfDescription, jobDescription } = req.body
+    try {
+        const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
+        const { selfDescription, jobDescription } = req.body
 
-    const interViewReportByAi = await generateInterviewReport({
-        resume: resumeContent.text,
-        selfDescription,
-        jobDescription
-    })
+        const interViewReportByAi = await generateInterviewReport({
+            resume: resumeContent.text,
+            selfDescription,
+            jobDescription
+        })
 
-    const interviewReport = await interviewReportModel.create({
-        user: req.user.id,
-        resume: resumeContent.text,
-        selfDescription,
-        jobDescription,
-        ...interViewReportByAi
-    })
+        const interviewReport = await interviewReportModel.create({
+            user: req.user.id,
+            resume: resumeContent.text,
+            selfDescription,
+            jobDescription,
+            ...interViewReportByAi
+        })
 
-    res.status(201).json({
-        message: "Interview report generated successfully.",
-        interviewReport
-    })
+        res.status(201).json({
+            message: "Interview report generated successfully.",
+            interviewReport
+        })
+    } catch (error) {
+        console.log(error)
+        const isRateLimit = error?.status === 429 || error?.message?.includes("429") || error?.message?.toLowerCase().includes("quota")
+
+        return res.status(isRateLimit ? 429 : 500).json({
+            message: isRateLimit
+                ? "AI service is currently busy. Please try again in a minute."
+                : "Failed to generate interview report. Please try again."
+        })
+    }
 
 }
 
@@ -85,14 +96,25 @@ async function generateResumePdfController(req, res) {
 
     const { resume, jobDescription, selfDescription } = interviewReport
 
-    const pdfBuffer = await generateResumePdf({ resume, jobDescription, selfDescription })
+    try {
+        const pdfBuffer = await generateResumePdf({ resume, jobDescription, selfDescription })
 
-    res.set({
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename=resume_${interviewReportId}.pdf`
-    })
+        res.set({
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `attachment; filename=resume_${interviewReportId}.pdf`
+        })
 
-    res.send(pdfBuffer)
+        res.send(pdfBuffer)
+    } catch (error) {
+        console.log(error)
+        const isRateLimit = error?.status === 429 || error?.message?.includes("429") || error?.message?.toLowerCase().includes("quota")
+
+        return res.status(isRateLimit ? 429 : 500).json({
+            message: isRateLimit
+                ? "AI service is currently busy. Please try again in a minute."
+                : "Failed to generate resume PDF. Please try again."
+        })
+    }
 }
 
 module.exports = { generateInterViewReportController, getInterviewReportByIdController, getAllInterviewReportsController, generateResumePdfController }
