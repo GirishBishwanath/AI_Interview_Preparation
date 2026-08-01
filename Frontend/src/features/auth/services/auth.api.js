@@ -5,60 +5,46 @@ const api = axios.create({
     withCredentials: true
 })
 
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("accessToken")
-
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-    }
-
-    return config
-})
 
 export async function register({ username, email, password }) {
-
     try {
-        const response = await api.post('/api/auth/register', {
-            username, email, password
-        })
+        const response = await api.post("/api/auth/register", {
+            username,
+            email,
+            password,
+        });
 
-        if (response.data?.user) {
-            localStorage.setItem("accessToken", response.data.accessToken || "")
-        }
+        // Cookie is already set by the backend.
+        // Nothing to store on the frontend.
 
-        return response.data
+        return response.data;
 
     } catch (err) {
-        console.log(err)
+        throw err.response?.data || {
+            message: "Something went wrong"
+        };
     }
 }
 
 export async function login({ email, password }) {
-
     try {
-
         const response = await api.post("/api/auth/login", {
-            email, password
-        })
+            email,
+            password,
+        });
 
-        if (response.data?.user) {
-            localStorage.setItem("accessToken", response.data.accessToken || "")
-        }
-
-        return response.data
+        return response.data;
 
     } catch (err) {
-        console.log(err)
+        throw err.response?.data || {
+            message: "Something went wrong"
+        };
     }
-
 }
 
 export async function logout() {
     try {
-
         const response = await api.get("/api/auth/logout")
-
-        localStorage.removeItem("accessToken")
 
         return response.data
 
@@ -70,7 +56,6 @@ export async function logout() {
 export async function getMe() {
 
     try {
-
         const response = await api.get("/api/auth/get-me")
 
         return response.data
