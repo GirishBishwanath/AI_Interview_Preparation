@@ -19,14 +19,20 @@ async function registerUserController(req, res) {
         })
     }
 
-    const isUserAlreadyExists = await userModel.findOne({
-        $or: [ { username }, { email } ]
-    })
+    const existingUsername = await userModel.findOne({ username });
 
-    if (isUserAlreadyExists) {
+    if (existingUsername) {
         return res.status(400).json({
-            message: "Account already exists with this email address or username"
-        })
+            message: "Account already exists with this username"
+        });
+    }
+
+    const existingEmail = await userModel.findOne({ email });
+
+    if (existingEmail) {
+        return res.status(400).json({
+            message: "Account already exists with this email address"
+        });
     }
 
     const hash = await bcrypt.hash(password, 10)
@@ -47,7 +53,6 @@ async function registerUserController(req, res) {
 
     res.status(201).json({
         message: "User registered successfully",
-        accessToken: token,
         user: {
             id: user._id,
             username: user.username,
@@ -71,7 +76,7 @@ async function loginUserController(req, res) {
 
     if (!user) {
         return res.status(400).json({
-            message: "Invalid email or password"
+            message: "Invalid email address"
         })
     }
 
@@ -79,8 +84,8 @@ async function loginUserController(req, res) {
 
     if (!isPasswordValid) {
         return res.status(400).json({
-            message: "Invalid email or password"
-        })
+            message: "Incorrect password"
+        });
     }
 
     const token = jwt.sign(
@@ -91,8 +96,7 @@ async function loginUserController(req, res) {
 
     setTokenCookie(res, token)
     res.status(200).json({
-        message: "User loggedIn successfully.",
-        accessToken: token,
+        message: "User logged in successfully.",
         user: {
             id: user._id,
             username: user.username,

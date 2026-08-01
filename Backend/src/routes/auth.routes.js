@@ -1,15 +1,17 @@
-const { Router } = require('express')
-const authController = require("../controllers/auth.controller")
-const authMiddleware = require("../middlewares/auth.middleware")
+const { Router } = require("express");
+const authController = require("../controllers/auth.controller");
+const authMiddleware = require("../middlewares/auth.middleware");
+const passport = require("../config/google.strategy");
+const { setTokenCookie } = require("../utils/authToken");
 
-const authRouter = Router()
+const authRouter = Router();
 
 /**
  * @route POST /api/auth/register
  * @description Register a new user
  * @access Public
  */
-authRouter.post("/register", authController.registerUserController)
+authRouter.post("/register", authController.registerUserController);
 
 
 /**
@@ -17,15 +19,55 @@ authRouter.post("/register", authController.registerUserController)
  * @description login user with email and password
  * @access Public
  */
-authRouter.post("/login", authController.loginUserController)
+authRouter.post("/login", authController.loginUserController);
 
+
+/**
+ * @route GET /api/auth/google
+ * @description Google OAuth Login
+ * @access Public
+ */
+authRouter.get(
+    "/google",
+    passport.authenticate("google", {
+        scope: ["profile", "email"]
+    })
+);
+
+/**
+ * @route GET /api/auth/google/callback
+ * @description Google OAuth Callback
+ * @access Public
+ */
+authRouter.get(
+    "/google/callback",
+    passport.authenticate("google", {
+        session: false,
+        failureRedirect: `${process.env.FRONTEND_URL}/login`,
+    }),
+    async (req, res) => {
+        try {
+            const { token } = req.user;
+
+            // Set JWT as HTTP-only cookie
+            setTokenCookie(res, token);
+
+            // Redirect to home page
+            res.redirect(`${process.env.FRONTEND_URL}/`);
+
+        } catch (err) {
+            console.error(err);
+            res.redirect(`${process.env.FRONTEND_URL}/login`);
+        }
+    }
+);
 
 /**
  * @route GET /api/auth/logout
  * @description clear token from user cookie and add the token in blacklist
  * @access public
  */
-authRouter.get("/logout", authController.logoutUserController)
+authRouter.get("/logout", authController.logoutUserController);
 
 
 /**
@@ -33,7 +75,7 @@ authRouter.get("/logout", authController.logoutUserController)
  * @description get the current logged in user details
  * @access private
  */
-authRouter.get("/get-me", authMiddleware.authUser, authController.getMeController)
+authRouter.get("/get-me", authMiddleware.authUser, authController.getMeController);
 
 
-module.exports = authRouter
+module.exports = authRouter;

@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router'
 import '../style/interview.scss'
 import { useInterview } from '../hooks/useInterview.js'
 import { useAuth } from '../../auth/hooks/useAuth.js'
+import Loader from "../../auth/components/Loader.jsx"
 
 
 const NAV_ITEMS = [
@@ -77,11 +78,7 @@ const Interview = () => {
 
 
     if (loading || !report) {
-        return (
-            <main className='loading-screen'>
-                <h1>Loading your interview plan...</h1>
-            </main>
-        )
+        return <Loader message="Loading your interview plan..." />
     }
 
     const scoreColor =
