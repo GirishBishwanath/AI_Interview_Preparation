@@ -17,7 +17,7 @@ const features = [
     },
     {
         icon: "🗓",
-        title: "7 day roadmap plan",
+        title: "Day-wise roadmap plan",
         desc: "Follow a structured, daily preparation schedule to stay on track."
     },
     {

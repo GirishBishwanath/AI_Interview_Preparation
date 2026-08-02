@@ -205,6 +205,7 @@ $severity-low: #3fb950;
         font-weight: 500;
         color: $text-primary;
         line-height: 1.5;
+        text-align: left;
     }
 
     &__chevron {
@@ -238,6 +239,7 @@ $severity-low: #3fb950;
             font-size: 0.835rem;
             color: color.adjust($text-muted, $lightness: 15%, $space: hsl);
             line-height: 1.6;
+            text-align: left;
         }
     }
 
