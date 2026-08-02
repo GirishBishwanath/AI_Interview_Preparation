@@ -7,29 +7,27 @@ import Loader from "../../auth/components/Loader.jsx"
 
 const Home = () => {
 
-    const { loading, generateReport,reports } = useInterview()
-    const [ jobDescription, setJobDescription ] = useState("")
-    const [ selfDescription, setSelfDescription ] = useState("")
-    const [ resumeFileName, setResumeFileName ] = useState(null)
-
+    const { loading, generateReport, reports } = useInterview()
+    const [jobDescription, setJobDescription] = useState("")
+    const [selfDescription, setSelfDescription] = useState("")
+    const [resumeFile, setResumeFile] = useState(null)
     const resumeInputRef = useRef()
     const navigate = useNavigate()
 
     const handleGenerateReport = async () => {
-        const resumeFile = resumeInputRef.current.files[ 0 ]
         const data = await generateReport({ jobDescription, selfDescription, resumeFile })
         navigate(`/interview/${data._id}`)
     }
 
     const handleResumeChange = (e) => {
         const file = e.target.files[0]
-        setResumeFileName(file ? file.name : null)
+        setResumeFile(file || null)
     }
 
     const handleRemoveResume = (e) => {
         e.preventDefault()
-        resumeInputRef.current.value = ""
-        setResumeFileName(null)
+        if (resumeInputRef.current) resumeInputRef.current.value = ""
+        setResumeFile(null)
     }
 
     const { handleLogout } = useAuth()
@@ -94,48 +92,41 @@ const Home = () => {
                                 Upload Resume
                                 <span className='badge badge--best'>Best Results</span>
                             </label>
-                            {!resumeFileName ? (
-                                <label className='dropzone' htmlFor='resume'>
-                                    <span className='dropzone__icon'>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" /></svg>
-                                    </span>
-                                    <p className='dropzone__title'>Click to upload or drag &amp; drop</p>
-                                    <p className='dropzone__subtitle'>PDF or DOCX (Max 5MB)</p>
-                                    <input
-                                        ref={resumeInputRef}
-                                        hidden
-                                        type='file'
-                                        id='resume'
-                                        name='resume'
-                                        accept='.pdf,.docx'
-                                        onChange={handleResumeChange}
-                                    />
-                                </label>
-                            ) : (
-                                <div className='dropzone dropzone--filled'>
-                                    <span className='dropzone__file-icon'>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-                                    </span>
-                                    <p className='dropzone__filename'>{resumeFileName}</p>
-                                    <button
-                                        type='button'
-                                        className='dropzone__remove'
-                                        onClick={handleRemoveResume}
-                                        aria-label='Remove file'
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                                    </button>
-                                    <input
-                                        ref={resumeInputRef}
-                                        hidden
-                                        type='file'
-                                        id='resume'
-                                        name='resume'
-                                        accept='.pdf,.docx'
-                                        onChange={handleResumeChange}
-                                    />
-                                </div>
-                            )}
+                            <div className={`dropzone ${resumeFile ? 'dropzone--filled' : ''}`}>
+                                {!resumeFile ? (
+                                    <label htmlFor='resume' className='dropzone__label'>
+                                        <span className='dropzone__icon'>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" /></svg>
+                                        </span>
+                                        <p className='dropzone__title'>Click to upload or drag &amp; drop</p>
+                                        <p className='dropzone__subtitle'>PDF or DOCX (Max 5MB)</p>
+                                    </label>
+                                ) : (
+                                    <>
+                                        <span className='dropzone__file-icon'>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                                        </span>
+                                        <p className='dropzone__filename'>{resumeFile.name}</p>
+                                        <button
+                                            type='button'
+                                            className='dropzone__remove'
+                                            onClick={handleRemoveResume}
+                                            aria-label='Remove file'
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                                        </button>
+                                    </>
+                                )}
+                                <input
+                                    ref={resumeInputRef}
+                                    hidden
+                                    type='file'
+                                    id='resume'
+                                    name='resume'
+                                    accept='.pdf,.docx'
+                                    onChange={handleResumeChange}
+                                />
+                            </div>
                         </div>
 
                         {/* OR Divider */}
@@ -192,15 +183,15 @@ const Home = () => {
             )}
 
             {/* Logout */}
-            <button 
-                onClick={handleSubmit} 
+            <button
+                onClick={handleSubmit}
                 className='button primary-button logoutButton'>
                 <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
-                    <path stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12h-9.5m7.5 3l3-3-3-3m-5-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h5a2 2 0 002-2v-1"/>
+                    <path stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12h-9.5m7.5 3l3-3-3-3m-5-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h5a2 2 0 002-2v-1" />
                 </svg>
                 Logout
             </button>
-            
+
             {/* Page Footer */}
             <footer className='page-footer'>
                 <a href='#'>Privacy Policy</a>
