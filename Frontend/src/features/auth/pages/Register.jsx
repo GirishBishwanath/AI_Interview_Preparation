@@ -126,9 +126,9 @@ const Register = () => {
                         </div>
 
                         <div className="password-checklist">
-                            <span className={hasMinLength ? "valid" : ""}>✓ At least 8 characters</span>
-                            <span className={hasUppercase ? "valid" : ""}>✓ One uppercase letter</span>
-                            <span className={hasNumberOrSymbol ? "valid" : ""}>✓ One number or symbol</span>
+                            <span className={hasMinLength ? "valid" : ""}>✓ Minimum 8 chars</span>
+                            <span className={hasUppercase ? "valid" : ""}>✓ One Uppercase</span>
+                            <span className={hasNumberOrSymbol ? "valid" : ""}>✓ One Number/Symbol</span>
                         </div>
 
                         {error && <div className="error-message">{error}</div>}
