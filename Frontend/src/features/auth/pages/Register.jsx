@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router'
 import "../auth.form.scss"
 import { useAuth } from '../hooks/useAuth'
@@ -35,7 +35,11 @@ const Register = () => {
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
 
-    const { loading, handleRegister, error } = useAuth()
+    const { loading, handleRegister, error, clearError } = useAuth()
+
+    useEffect(() => {
+        clearError()
+    }, [])
 
     const handleSubmit = async (e) => {
         e.preventDefault()

@@ -56,6 +56,10 @@ export const useAuth = () => {
         }
     }
 
+    const clearError = () => {
+        setError("");
+    }
+
     const handleLogout = async () => {
 
         setLoading(true)
@@ -96,5 +100,5 @@ export const useAuth = () => {
 
     }, [])
 
-    return { user, loading, error, handleRegister, handleLogin, handleLogout }
+    return { user, loading, error, handleRegister, handleLogin, handleLogout, clearError }
 }

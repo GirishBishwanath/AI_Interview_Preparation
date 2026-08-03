@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router'
 import "../auth.form.scss"
 import { useAuth } from '../hooks/useAuth'
@@ -29,8 +29,12 @@ const features = [
 
 const Login = () => {
 
-    const { loading, handleLogin, error } = useAuth();
+    const { loading, handleLogin, error, clearError } = useAuth();
     const navigate = useNavigate()
+
+    useEffect(() => {
+        clearError()
+    }, [])
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
